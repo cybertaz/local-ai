@@ -33,31 +33,6 @@ x-n8n: &service-n8n
   links:
     - postgres
 
-x-ollama: &service-ollama
-  image: ollama/ollama:latest
-  container_name: ollama
-  networks: ['local-ai']
-  restart: unless-stopped
-  ports:
-    - 11434:11434
-  environment:
-    - OLLAMA_HOST=0.0.0.0
-  volumes:
-    - ollama_storage:/root/.ollama
-
-x-init-ollama: &init-ollama
-  image: ollama/ollama:latest
-  networks: ['local-ai']
-  container_name: ollama-pull-llama
-  volumes:
-    - ollama_storage:/root/.ollama
-  entrypoint: /bin/sh
-  command:
-    - "-c"
-    - "sleep 3; OLLAMA_HOST=ollama:11434 ollama pull llama3.1; OLLAMA_HOST=ollama:11434 ollama pull nomic-embed-text"
-  depends_on:
-    - ollama
-
 services:
   open-webui:
     image: ghcr.io/open-webui/open-webui:main
@@ -68,8 +43,6 @@ services:
       - "8080:8080"
     environment:
       - OLLAMA_BASE_URL=http://ollama:11434
-    #extra_hosts:
-    #  - "host.docker.internal:host-gateway"
     volumes:
       - open-webui:/app/backend/data
     depends_on:
