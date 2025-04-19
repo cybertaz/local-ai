@@ -37,6 +37,8 @@ x-ollama: &service-ollama
   restart: unless-stopped
   ports:
     - 11434:11434
+  environment:
+    - OLLAMA_HOST=0.0.0.0
   volumes:
     - ollama_storage:/root/.ollama
 
@@ -59,10 +61,14 @@ services:
     container_name: open-webui
     ports:
       - "8080:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
       - open-webui:/app/backend/data
+    depends_on:
+      - ollama
 
   postgres:
     image: postgres:16-alpine
