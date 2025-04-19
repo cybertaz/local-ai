@@ -145,12 +145,27 @@ services:
       - qdrant_storage:/qdrant/storage
 
   ollama:
-    <<: *service-ollama
+    image: ollama/ollama:latest
+    container_name: ollama
+    networks: ['local-ai']
+    restart: unless-stopped
+    ports:
+      - 11434:11434
     environment:
       - OLLAMA_HOST=0.0.0.0
+    volumes:
+      - ollama_storage:/root/.ollama
 
   ollama-pull-llama:
-    <<: *init-ollama
+    image: ollama/ollama:latest
+    networks: ['local-ai']
+    container_name: ollama-pull-llama
+    volumes:
+      - ollama_storage:/root/.ollama
+    entrypoint: /bin/sh
+    command:
+      - "-c"
+      - "sleep 3; OLLAMA_HOST=ollama:11434 ollama pull llama3.1; OLLAMA_HOST=ollama:11434 ollama pull nomic-embed-text"
     depends_on:
       - ollama
 
